@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database Service
+  postgres:
+    image: ankane/pgvector:latest
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: chatwoot_production
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: secure_database_password
+    networks:
+      - chatwoot_network
+
+  # 2. Redis Cache & Queue Service
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - chatwoot_network
+
+  # 3. Chatwoot Web Application
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: chatwoot-app:latest
+    ports:
+      - "3000:3000"
+    environment:
+      # Connect the Web app to the DB and Redis using Docker networking DNS
+      DATABASE_URL: postgres://chatwoot:secure_database_password@postgres:5432/chatwoot_production
+      REDIS_URL: redis://redis:6379/0
+      RAILS_ENV: production
+      SECRET_KEY_BASE: generate_a_random_secret_string_here
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - chatwoot_network
+
+  # 4. Sidekiq Background Worker
+  worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: chatwoot-app:latest
+    # Override the default CMD in the Dockerfile to run Sidekiq instead of the web server
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    environment:
+      DATABASE_URL: postgres://chatwoot:secure_database_password@postgres:5432/chatwoot_production
+      REDIS_URL: redis://redis:6379/0
+      RAILS_ENV: production
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - chatwoot_network
+
+# Define persistent storage volumes
+volumes:
+  postgres_data:
+  redis_data:
+
+# Define a custom network for container communication
+networks:
+  chatwoot_network:
+    driver: bridge
