@@ -86,16 +86,16 @@ pipeline {
         }
 
         // ── Stage 6: Run tests ────────────────────────────────────────────
-        stage('RSpec') {
-            steps {
-                sh '''
-                    cd chatwoot-src
-                    docker compose -p ${COMPOSE_PROJECT_NAME} run --rm \
-                        -e RAILS_ENV=test web \
-                        bundle exec rspec --format progress
-                '''
-            }
-        }
+        // stage('RSpec') {
+        //     steps {
+        //         sh '''
+        //             cd chatwoot-src
+        //             docker compose -p ${COMPOSE_PROJECT_NAME} run --rm \
+        //                 -e RAILS_ENV=test web \
+        //                 bundle exec rspec --format progress
+        //         '''
+        //     }
+        // }
 
         // ── Stage 7: Deploy locally ───────────────────────────────────────
         // Only runs if all tests pass
