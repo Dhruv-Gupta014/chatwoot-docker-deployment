@@ -79,7 +79,7 @@ pipeline {
                 sh '''
                     cd chatwoot-src
                     docker compose -p ${COMPOSE_PROJECT_NAME} run --rm \
-                        -e RAILS_ENV=test web \
+                        -e RAILS_ENV=production web \
                         bundle exec rails db:chatwoot_prepare
                 '''
             }
