@@ -320,7 +320,7 @@ Checks:
 | CI/CD | Automated build + test on every push |
 | Tool used - ngrok
 | Web hook test and implemented
-
+|Also update rails service env to prodution instead of test in Jenkinsfile
 ---
 
 ## 🔗 References
